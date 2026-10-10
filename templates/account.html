@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Account - AI_Agriculture_Disease_Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #e9f0f5 100%); min-height: 100vh; }
+
+        .navbar {
+            background: linear-gradient(135deg, #1e3c3f 0%, #2a5a5e 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .navbar h2 i { margin-right: 10px; color: #4ecdc4; }
+        .nav-links { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .nav-link.active { background: #4ecdc4; color: #1e3c3f; }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover { background: #c82333; transform: translateY(-2px); }
+
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+
+        .profile-header {
+            background: linear-gradient(135deg, #1e3c3f 0%, #2a5a5e 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 50%;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #1e3c3f;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 2;
+        }
+        .profile-info { flex: 1; position: relative; z-index: 2; }
+        .profile-info h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .profile-info p { opacity: 0.9; margin-bottom: 0.3rem; }
+        .profile-stats { display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; }
+        .stat-box {
+            text-align: center;
+            background: rgba(255,255,255,0.15);
+            padding: 0.5rem 1.5rem;
+            border-radius: 15px;
+        }
+        .stat-number { font-size: 1.5rem; font-weight: 700; color: #4ecdc4; }
+        .stat-label { font-size: 0.8rem; opacity: 0.8; }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1.5rem 0 1rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .section-header h3 {
+            color: #1e3c3f;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-header h3 i { color: #4ecdc4; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .image-card {
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            border-radius: 12px;
+        }
+        .image-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .image-container { position: relative; height: 220px; overflow: hidden; }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .image-card:hover .image-container img { transform: scale(1.05); }
+
+        .severity-badge {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+            z-index: 5;
+        }
+        .severity-badge.high { background: #dc3545; }
+        .severity-badge.medium { background: #ffc107; color: #1e3c3f; }
+        .severity-badge.low { background: #28a745; }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            color: #dc3545;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .delete-btn:hover { background: #dc3545; color: white; transform: scale(1.1); }
+
+        .plant-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(78,205,196,0.9);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+        .image-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .image-card:hover .image-info { transform: translateY(0); }
+        .image-info .disease-name { font-weight: 600; color: #4ecdc4; font-size: 0.9rem; }
+
+        .image-card-footer {
+            padding: 0.8rem;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            background: white;
+            border-radius: 15px;
+            grid-column: 1 / -1;
+        }
+        .empty-state i { font-size: 4rem; color: #ddd; margin-bottom: 1rem; }
+        .empty-state h3 { color: #1e3c3f; margin-bottom: 0.5rem; }
+        .empty-state p { color: #666; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); overflow-y: auto; }
+        .modal-content { background: white; margin: 3% auto; padding: 2rem; border-radius: 20px; width: 90%; max-width: 1000px; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 25px; font-size: 2.5rem; cursor: pointer; color: #999; }
+        .close-modal:hover { color: #333; }
+        .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .modal-image img { width: 100%; border-radius: 15px; }
+        .diagnosis-card { background: #f8f9fa; padding: 1.5rem; border-radius: 15px; margin: 1.5rem 0; border-left: 4px solid #4ecdc4; }
+        .diagnosis-section { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e0e0; }
+        .diagnosis-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .diagnosis-section strong { display: block; color: #1e3c3f; margin-bottom: 0.3rem; }
+        .diagnosis-section p { color: #666; line-height: 1.6; }
+        .confirmed-disease { color: #dc3545; font-weight: 600; font-size: 1.2rem; }
+        .confidence-bar { height: 8px; background: #e9ecef; border-radius: 4px; margin: 0.5rem 0; overflow: hidden; }
+        .confidence-fill { height: 100%; background: linear-gradient(90deg, #4ecdc4, #2a5a5e); }
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #28a745; color: white; padding: 1rem 1.5rem; border-radius: 10px; display: none; z-index: 1001; align-items: center; gap: 10px; }
+        .toast.error { background: #dc3545; }
+        .info-section { margin-bottom: 1.5rem; }
+        .info-section h3 { color: #1e3c3f; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .info-section h3 i { color: #4ecdc4; }
+
+        @media (max-width: 768px) {
+            .profile-header { flex-direction: column; text-align: center; }
+            .profile-stats { justify-content: center; }
+            .modal-body { grid-template-columns: 1fr; }
+            .grid { grid-template-columns: 1fr; }
+            .navbar { flex-direction: column; align-items: stretch; text-align: center; }
+            .nav-links { justify-content: center; }
+            .section-header { flex-direction: column; align-items: stretch; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2><i class="fas fa-seedling"></i> Plant AI Health Monitor</h2>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-globe"></i> Gallery</a>
+            <a href="{{ url_for('account') }}" class="nav-link active"><i class="fas fa-user"></i> My Account</a>
+            <a href="{{ url_for('upload') }}" class="nav-link"><i class="fas fa-upload"></i> Upload</a>
+            <a href="{{ url_for('logout') }}" class="btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-info">
+                <h1>{{ user_name }}</h1>
+                <p><i class="fas fa-envelope"></i> {{ user_email }}</p>
+                <p><i class="fas fa-calendar-alt"></i> Member since {{ member_since }}</p>
+                <div class="profile-stats">
+                    <div class="stat-box">
+                        <div class="stat-number">{{ my_uploads|length }}</div>
+                        <div class="stat-label">My Plants</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Plants Section -->
+        <div class="section-header">
+            <h3><i class="fas fa-leaf"></i> My Plant Gallery</h3>
+            <a href="{{ url_for('upload') }}" class="nav-link" style="background: #4ecdc4; color: #1e3c3f;">
+                <i class="fas fa-plus-circle"></i> Add New Plant
+            </a>
+        </div>
+
+        <div class="grid" id="uploadsGrid">
+            {% for upload in my_uploads %}
+            <div class="image-card" 
+                 data-id="{{ upload.id }}" 
+                 data-image="{{ upload.image_path }}" 
+                 data-disease="{{ upload.prediction }}" 
+                 data-confidence="{{ upload.confidence }}" 
+                 data-severity="{{ upload.severity }}" 
+                 data-symptoms="{{ upload.symptoms or '' }}" 
+                 data-cause="{{ upload.cause or '' }}" 
+                 data-treatment="{{ upload.treatment or '' }}" 
+                 data-organic="{{ upload.organic or '' }}" 
+                 data-prevention="{{ upload.prevention or '' }}" 
+                 data-date="{{ upload.created_at.strftime('%d %b, %Y %H:%M') if upload.created_at else '' }}" 
+                 onclick="openImageModal(this)">
+                <button class="delete-btn" onclick="event.stopPropagation(); showDeleteModal({{ upload.id }})">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <div class="plant-badge"><i class="fas fa-leaf"></i></div>
+                <div class="image-container">
+                    <img src="{{ upload.image_path }}" alt="Plant Image" loading="lazy">
+                    <div class="image-info">
+                        <p class="disease-name">{{ upload.prediction[:40] }}</p>
+                        <p><i class="fas fa-chart-line"></i> Confidence: {{ "%.1f"|format(upload.confidence or 0) }}%</p>
+                    </div>
+                    {% set sev = upload.severity or 'LOW' %}
+                    <div class="severity-badge {% if sev == 'HIGH' %}high{% elif sev == 'MEDIUM' %}medium{% else %}low{% endif %}">{{ sev }}</div>
+                </div>
+                <div class="image-card-footer">
+                    <span><i class="far fa-calendar-alt"></i> {{ upload.created_at.strftime('%d %b %Y') if upload.created_at else 'N/A' }}</span>
+                    <span><i class="fas fa-microchip"></i> AI v2.0</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-leaf"></i>
+                <h3>No Plants Yet</h3>
+                <p>Start your plant health journey by uploading your first image!</p>
+                <a href="{{ url_for('upload') }}" class="nav-link" style="display: inline-block; margin-top: 1rem; background: #4ecdc4; color: #1e3c3f; padding: 0.8rem 1.5rem;">
+                    <i class="fas fa-upload"></i> Upload Your First Plant
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close-modal" onclick="closeImageModal()">&times;</span>
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-image"><img id="modalImage" src="" alt="Plant Image"></div>
+                <div class="modal-details">
+                    <h2>Plant Diagnosis Report</h2>
+                    <div id="modalDisease" class="disease-name"></div>
+                    <div id="modalSeverity" class="severity"></div>
+                    <div class="diagnosis-card">
+                        <h3><i class="fas fa-stethoscope"></i> Complete Diagnosis Report</h3>
+                        <div class="diagnosis-section"><strong><i class="fas fa-check-circle" style="color:#28a745;"></i> CONFIRMED DIAGNOSIS:</strong><p id="modalDiseaseFull" class="confirmed-disease"></p></div>
+                        <div class="diagnosis-section"><strong><i class="fas fa-search"></i> Symptoms:</strong><p id="modalSymptoms"></p></div>
+                        <div class="diagnosis-section"><strong><i class="fas fa-dna"></i> Cause:</strong><p id="modalCause"></p></div>
+                        <div class="diagnosis-section"><strong><i class="fas fa-pills"></i> Treatment:</strong><p id="modalTreatment"></p></div>
+                        <div class="diagnosis-section"><strong><i class="fas fa-leaf"></i> Organic Options:</strong><p id="modalOrganic"></p></div>
+                        <div class="diagnosis-section"><strong><i class="fas fa-shield-alt"></i> Prevention:</strong><p id="modalPrevention"></p></div>
+                    </div>
+                    <div class="info-section" style="background:#e3f2fd; padding:1rem; border-radius:10px;">
+                        <h3><i class="fas fa-chart-line"></i> Analysis Confidence</h3>
+                        <div id="modalConfidenceValue"></div>
+                        <div class="confidence-bar"><div id="modalConfidenceBar" class="confidence-fill" style="width:0%"></div></div>
+                    </div>
+                    <div class="info-section"><h3><i class="fas fa-calendar-alt"></i> Analyzed On</h3><p id="modalDate"></p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #dc3545;"></i>
+                <h3 style="margin: 0;">Confirm Deletion</h3>
+            </div>
+            <div style="margin-bottom: 2rem; color: #666;">Are you sure you want to delete this analysis? This action cannot be undone.</div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeDeleteModal()" style="padding: 0.5rem 1.5rem; background: #f0f0f0; border: none; border-radius: 8px; cursor: pointer;">Cancel</button>
+                <button id="confirmDeleteBtn" style="padding: 0.5rem 1.5rem; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" style="display:none;"><i class="fas fa-check-circle"></i><span id="toastMessage"></span></div>
+
+    <script>
+        let currentDeleteId = null;
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast ' + type;
+            document.getElementById('toastMessage').textContent = message;
+            toast.style.display = 'flex';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function openImageModal(element) {
+            const modal = document.getElementById('imageModal');
+            document.getElementById('modalImage').src = element.dataset.image;
+            document.getElementById('modalDisease').textContent = element.dataset.disease;
+            document.getElementById('modalDiseaseFull').textContent = element.dataset.disease;
+            document.getElementById('modalSymptoms').innerHTML = element.dataset.symptoms || 'No symptom information available.';
+            document.getElementById('modalCause').innerHTML = element.dataset.cause || 'Cause information not available.';
+            document.getElementById('modalTreatment').innerHTML = element.dataset.treatment || 'Treatment information not available.';
+            document.getElementById('modalOrganic').innerHTML = element.dataset.organic || 'Organic options not available.';
+            document.getElementById('modalPrevention').innerHTML = element.dataset.prevention || 'Prevention tips not available.';
+
+            const severity = element.dataset.severity || 'LOW';
+            document.getElementById('modalSeverity').textContent = severity + ' Severity';
+            document.getElementById('modalSeverity').className = 'severity ' + severity.toLowerCase();
+
+            const confidence = parseFloat(element.dataset.confidence || 0);
+            document.getElementById('modalConfidenceValue').textContent = confidence.toFixed(1) + '% Confidence';
+            document.getElementById('modalConfidenceBar').style.width = confidence + '%';
+            document.getElementById('modalDate').textContent = element.dataset.date;
+
+            modal.style.display = 'block';
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        window.showDeleteModal = function(id) {
+            currentDeleteId = id;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        window.closeDeleteModal = function() {
+            document.getElementById('deleteModal').style.display = 'none';
+            currentDeleteId = null;
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('imageModal')) closeImageModal();
+            if (event.target == document.getElementById('deleteModal')) closeDeleteModal();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { closeImageModal(); closeDeleteModal(); }
+        });
+
+        document.getElementById('confirmDeleteBtn')?.addEventListener('click', async function() {
+            if (!currentDeleteId) return;
+            const btn = this;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/delete-upload/${currentDeleteId}`, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    document.querySelector(`.image-card[data-id="${currentDeleteId}"]`)?.remove();
+                    showToast('Analysis deleted successfully!');
+                    closeDeleteModal();
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    showToast(data.error || 'Failed to delete', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting analysis', 'error');
+            } finally {
+                btn.innerHTML = 'Delete';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

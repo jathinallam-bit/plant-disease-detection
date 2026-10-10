@@ -1,0 +1,14 @@
+﻿__pycache__/
+*.py[cod]
+instance/
+*.db
+*.sqlite3
+static/uploads/*
+!static/uploads/.gitkeep
+.env
+.env.local
+dataset/
+models/*.h5
+models/*.keras
+.vscode/
+.DS_Store
