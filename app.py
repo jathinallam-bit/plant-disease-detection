@@ -26,6 +26,7 @@ if database_url.startswith('postgres://'):
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 os.makedirs('instance', exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db.init_app(app)
 
@@ -33,8 +34,6 @@ if OAUTH_AVAILABLE:
     google = init_oauth(app)
 else:
     google = None
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 def allowed_file(filename):
@@ -239,8 +238,11 @@ def inject_user():
     return dict(session_user=None)
 
 
-if __name__ == '__main__':
-    with app.app_context():
+# ============================================================
+# DATABASE INITIALIZATION — runs on import (works with Gunicorn)
+# ============================================================
+with app.app_context():
+    try:
         db.create_all()
         demo = db.session.execute(select(User).where(User.email == 'demo@example.com')).scalar_one_or_none()
         if not demo:
@@ -261,6 +263,11 @@ if __name__ == '__main__':
                 db.session.add(u)
             db.session.commit()
             print("[OK] Sample uploads created!")
+    except Exception as e:
+        print(f"[WARN] DB init skipped or failed: {e}")
+
+
+if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', '0') == '1'
     print("=" * 60)
