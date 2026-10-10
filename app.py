@@ -1,4 +1,3 @@
-$content = @"
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -21,7 +20,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Use PostgreSQL on Railway, SQLite locally
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///instance/plant_ai.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -270,6 +268,3 @@ if __name__ == '__main__':
     print(f"Server: http://0.0.0.0:{port}")
     print("=" * 60)
     app.run(debug=debug, host='0.0.0.0', port=port)
-"@
-$content | Out-File -FilePath "app.py" -Encoding utf8 -NoNewline
-Write-Host "app.py updated for Railway!"
