@@ -8,12 +8,14 @@ def init_oauth(app):
     """Initialize Google OAuth with credentials from environment variables."""
     oauth = OAuth(app)
 
-    client_id = os.environ.get('GOOGLE_CLIENT_ID', '')
-    client_secret = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+    client_id = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+    client_secret = os.environ.get('GOOGLE_CLIENT_SECRET', '').strip()
 
     if not client_id or not client_secret:
         print("[WARN] Google OAuth credentials missing — Google login disabled")
         return None
+
+    print(f"[OK] Google OAuth initialized (client_id ends: ...{client_id[-20:]})")
 
     google = oauth.remote_app(
         'google',

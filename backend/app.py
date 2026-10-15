@@ -14,7 +14,8 @@ from models import db, User, Upload, Notification
 try:
     from oauth import init_oauth, get_google_user_info
     OAUTH_AVAILABLE = True
-except ImportError:
+except Exception as e:
+    print(f"[WARN] oauth.py import failed: {e}")
     OAUTH_AVAILABLE = False
 
 # ============================================================
@@ -39,7 +40,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 # ============================================================
 database_url = os.environ.get('DATABASE_URL', '')
 if not database_url or database_url.startswith('sqlite'):
-    # Force absolute SQLite path
     db_path = os.path.join(BASE_DIR, 'instance', 'plant_ai.db')
     database_url = f'sqlite:///{db_path}'
 elif database_url.startswith('postgres://'):
@@ -56,10 +56,20 @@ print(f"[DB] Using: {database_url}")
 
 db.init_app(app)
 
+# ============================================================
+# GOOGLE OAUTH INITIALIZATION
+# ============================================================
+google = None
 if OAUTH_AVAILABLE:
-    google = init_oauth(app)
-else:
-    google = None
+    try:
+        google = init_oauth(app)
+        if google is None:
+            print("[WARN] Google OAuth is disabled (missing credentials)")
+            OAUTH_AVAILABLE = False
+    except Exception as e:
+        print(f"[WARN] Google OAuth init failed: {e}")
+        google = None
+        OAUTH_AVAILABLE = False
 
 
 def allowed_file(filename):
@@ -164,7 +174,7 @@ def register():
 
 @app.route('/login/google')
 def google_login():
-    if not OAUTH_AVAILABLE:
+    if not OAUTH_AVAILABLE or google is None:
         flash('Google login is not available.', 'info')
         return redirect(url_for('login'))
     return google.authorize(callback=url_for('google_callback', _external=True))
@@ -172,7 +182,8 @@ def google_login():
 
 @app.route('/google/callback')
 def google_callback():
-    if not OAUTH_AVAILABLE:
+    if not OAUTH_AVAILABLE or google is None:
+        flash('Google login is not available.', 'error')
         return redirect(url_for('login'))
     try:
         resp = google.authorized_response()
@@ -280,7 +291,6 @@ def upload():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
             file.save(filepath)
 
-            # Disease detection (rule-based for now)
             disease = random.choice(list(DISEASE_DATA.keys()))
             confidence = random.uniform(70, 98)
             info = DISEASE_DATA[disease]
@@ -341,7 +351,6 @@ def delete_upload(upload_id):
 
 @app.route('/api/uploads', methods=['GET'])
 def api_uploads():
-    """REST API endpoint for React frontend."""
     if 'user_id' not in session:
         return jsonify([])
     uploads = Upload.query.filter_by(user_id=session['user_id']).order_by(Upload.created_at.desc()).all()
