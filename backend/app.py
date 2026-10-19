@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix  # <-- ADDED FOR RAILWAY
 from sqlalchemy import select
 import os, random
 from datetime import datetime
@@ -26,6 +27,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__,
             template_folder=os.path.join(BASE_DIR, 'templates'),
             static_folder=os.path.join(BASE_DIR, 'static'))
+
+# <-- ADDED FOR RAILWAY: Trust the proxy headers to fix the http/https mismatch
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
 app.secret_key = os.environ.get('SECRET_KEY', 'plant-ai-secret-key')
 
 # Upload folder
@@ -36,7 +41,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # ============================================================
 # DATABASE CONFIGURATION
-# Uses absolute path for SQLite so Flask finds it from anywhere
 # ============================================================
 database_url = os.environ.get('DATABASE_URL', '')
 if not database_url or database_url.startswith('sqlite'):
@@ -177,6 +181,12 @@ def google_login():
     if not OAUTH_AVAILABLE or google is None:
         flash('Google login is not available.', 'info')
         return redirect(url_for('login'))
+        
+    # <-- ADDED FOR RAILWAY: Force the exact redirect URI from environment variables
+    redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
+    if redirect_uri:
+        return google.authorize(callback=redirect_uri)
+    # Fallback if env var is missing
     return google.authorize(callback=url_for('google_callback', _external=True))
 
 
